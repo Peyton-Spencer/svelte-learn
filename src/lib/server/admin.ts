@@ -4,7 +4,7 @@ import {
   client_email,
   private_key,
   project_id,
-} from "$lib/server/service-account.json";
+} from "$lib/server/firebase-service-account.json";
 import pkg from "firebase-admin";
 
 try {

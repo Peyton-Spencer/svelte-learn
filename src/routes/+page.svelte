@@ -1,15 +1,34 @@
+<script>
+  import { goto } from "$app/navigation";
+</script>
+
 <p>
   Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
 </p>
-<h1 class="text-3xl font-bold underline">
-  Welcome to SvelteKit, hello from windows
-</h1>
+<h1 class="text-3xl font-bold underline">Welcome to SvelteKit</h1>
 
-<a href="/users/peyton">Hello Peyton</a>
-<a href="/boat">Boats for sale</a>
+<button
+  class="btn btn-primary"
+  on:click={() => {
+    goto(`/users/peyton`);
+  }}>Hello Peyton</button
+>
+<button
+  class="btn btn-secondary"
+  on:click={() => {
+    goto(`/boats`);
+  }}>Boats for Sale</button
+>
+
+<button
+  class="btn btm-nav-sm"
+  on:click={() => {
+    goto(`/login`);
+  }}>Login</button
+>
 
 <style lang="postcss">
   :global(html) {
-    background-color: theme(colors.gray.100);
+    background-color: theme(colors.slate.800);
   }
 </style>

@@ -10,6 +10,6 @@
 <form method="POST" action="?/rename" use:enhance>
   <input type="text" name="boatName" placeholder="Boat Name" />
   <button type="submit">Submit</button>
-  <button formaction="?/capitalize"><strong>SHOUT</strong> your boat</button>
-  <button formaction="?/lowercase"><em>whisper</em> your boat</button>
+  <button class="btn btn-outline" formaction="?/capitalize"><strong>SHOUT</strong> your boat</button>
+  <button class="btn btn-neutral" formaction="?/lowercase"><em>whisper</em> your boat</button>
 </form>
