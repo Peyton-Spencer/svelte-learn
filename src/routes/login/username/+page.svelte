@@ -60,7 +60,6 @@
 
 <style>
   p {
-    color: gray;
     font-style: italic;
     padding: 0.5rem;
   }
