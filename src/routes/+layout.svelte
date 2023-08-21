@@ -2,7 +2,7 @@
   import "../app.css";
 </script>
 
-<div class="max-w-screen-lg flex flex-col">
+<div class="min-h-screen flex flex-col">
   <slot />
 </div>
 
@@ -12,3 +12,11 @@
     rel="stylesheet"
   />
 </svelte:head>
+
+<style>
+  :global(h1, h2, p) {
+    font-family: Fira Code, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+      "Helvetica Neue", sans-serif;
+  }
+</style>

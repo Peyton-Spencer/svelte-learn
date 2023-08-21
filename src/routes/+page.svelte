@@ -23,12 +23,6 @@
 <button
   class="btn btm-nav-sm"
   on:click={() => {
-    goto(`/login`);
+    goto(`/login/auth`);
   }}>Login</button
 >
-
-<style lang="postcss">
-  :global(html) {
-    background-color: theme(colors.slate.800);
-  }
-</style>

@@ -2,7 +2,9 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import type { User } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { writable } from "svelte/store";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
@@ -22,3 +24,26 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore();
 export const auth = getAuth();
 export const storage = getStorage();
+/**
+ * @returns a store for the current user
+ */
+function userStore() {
+  let unsub: () => void;
+  if (!auth || !globalThis.window) {
+    console.warn("auth or window not available");
+    const { subscribe } = writable<User | null>(null);
+    return { subscribe };
+  }
+
+  const { subscribe } = writable(auth?.currentUser ?? null, (set) => {
+    unsub = auth.onAuthStateChanged((user) => {
+      set(user);
+    });
+
+    return () => unsub();
+  });
+
+  return { subscribe };
+}
+
+export const user = userStore();
