@@ -1,7 +1,7 @@
 <script lang="ts">
   import AuthCheck from "$lib/components/AuthCheck.svelte";
   import { db, user } from "$lib/firebase";
-  import { collection, doc, getDoc, writeBatch } from "firebase/firestore";
+  import { doc, getDoc, writeBatch } from "firebase/firestore";
 
   let username = "";
   let currentUsername = "";
@@ -9,12 +9,22 @@
   let loading = false;
   let isAvailable = false;
 
+  const re = /^(?=[a-zA-Z0-9._]{3,16}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
+  $: isValid =
+    username?.length > 2 && username.length < 16 && re.test(username);
+  $: isTouched = username.length > 0;
+  $: isTaken = isValid && !isAvailable && !loading;
+
   let debounceTimer: NodeJS.Timeout;
 
   async function checkAvailability() {
     isAvailable = false;
     clearTimeout(debounceTimer);
     loading = true;
+    if (!isValid) {
+      loading = false;
+      return;
+    }
 
     debounceTimer = setTimeout(async () => {
       console.log("Checking if this is avail: ", username);
@@ -28,12 +38,6 @@
       const exists = myDoc.exists();
       if (exists) {
         console.log("Username already taken");
-        // alert(
-        //   "Username already taken by: " +
-        //     myDoc.get("uid") +
-        //     "\n your username: " +
-        //     $user!.uid
-        // );
         if (myDoc.get("uid") === $user!.uid) {
           currentUsername = username;
           doIOwnUsername = true;
@@ -75,46 +79,66 @@
     <input
       type="text"
       placeholder="Username"
-      class="input w-full"
       bind:value={username}
       on:input={checkAvailability}
+      class="input w-full"
+      class:input-error={!isValid && isTouched}
+      class:input-warning={isValid && isTouched && isTaken && !doIOwnUsername}
+      class:input-success={isValid &&
+        isTouched &&
+        (isAvailable || doIOwnUsername)}
     />
-
-    {#if !username}
-      <p>Please pick a username</p>
-    {:else if loading}
-      <p>Loading...</p>
-    {:else if isAvailable}
-      <p class="text-green-500">
-        {username} is available!
-      </p>
-      <p>
-        <small> 🎄💯🔥 LESS GOOOO 🎄</small>
-      </p>
-    {:else if !doIOwnUsername}
-      <p class="text-red-500">
-        Sorry, {username} is already taken. Please choose another 😭
-      </p>
-      <p>
-        {#if currentUsername}
-          <small>
-            You can still use @{currentUsername} if you like.
-          </small>
-        {/if}
-      </p>
-    {:else}
-      <p class="text-green-500">You already own this username! 🎉</p>
-    {/if}
-
-    {#if username}
-      {#if !doIOwnUsername && isAvailable}
-        <button class="btn btn-success">Confirm username: @{username} </button>
+    <div class="my-4 min-h-16 px-4 w-full">
+      {#if !username}
+        <p>Please pick a username</p>
+      {:else if loading}
+        <p class="text-secondary">Checking availability of @{username}...</p>
+      {:else if !isValid && isTouched}
+        <ol class="list-disc text-error text-sm text-left">
+          <li>Yo, be 3-16 chars long please.</li>
+          <li>
+            and could u please use <ol class="list-disc pl-8">
+              <li>[a-z]</li>
+              <li>[0-9]</li>
+              <li>period . and underscore _</li>
+            </ol>
+          </li>
+          <li>tysm 💚🎄</li>
+        </ol>
       {:else if isAvailable}
-        <button class="btn btn-success"
-          >Update username to: @{username}
-        </button>
+        <p class="text-green-500">
+          {username} is available!
+        </p>
+        <p>
+          <small> 🎄💯🔥 LESS GOOOO 🎄</small>
+        </p>
+      {:else if !doIOwnUsername}
+        <p class="text-warning text-sm">
+          Sorry, {username} is already taken. Please choose another 😭
+        </p>
+        <p>
+          {#if currentUsername}
+            <small>
+              You can still use @{currentUsername} if you like.
+            </small>
+          {/if}
+        </p>
+      {:else}
+        <p class="text-success">You already own this username! 🎉</p>
       {/if}
-    {/if}
+
+      {#if username && isValid}
+        {#if !doIOwnUsername && isAvailable}
+          <button class="btn btn-success"
+            >Confirm username: @{username}
+          </button>
+        {:else if isAvailable}
+          <button class="btn btn-success"
+            >Update username to: @{username}
+          </button>
+        {/if}
+      {/if}
+    </div>
   </form>
 </AuthCheck>
 
