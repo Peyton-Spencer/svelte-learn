@@ -1,10 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { writable } from "svelte/store";
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
@@ -35,8 +35,8 @@ function userStore() {
     return { subscribe };
   }
 
-  const { subscribe } = writable(auth?.currentUser ?? null, (set) => {
-    unsub = auth.onAuthStateChanged((user) => {
+  const { subscribe } = writable(auth?.currentUser ?? null, (set: any) => {
+    unsub = auth.onAuthStateChanged((user: any) => {
       set(user);
     });
 
@@ -47,3 +47,20 @@ function userStore() {
 }
 
 export const user = userStore();
+
+export function docStore<T>(path: string) {
+  let unsub: () => void;
+  const docRef = doc(db, path);
+  const { subscribe } = writable<T | null>(null, (set: any) => {
+    unsub = onSnapshot(docRef, (doc: any) => {
+      set((doc.data() as T) ?? null);
+    });
+
+    return () => unsub();
+  });
+  return {
+    subscribe,
+    ref: docRef,
+    id: docRef.id,
+  };
+}

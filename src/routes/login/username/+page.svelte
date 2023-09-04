@@ -55,19 +55,45 @@
       return;
     }
     console.log("Confirming username: ", username);
-    const batch = writeBatch(db);
-    batch.set(doc(db, "usernames", username), { uid: $user!.uid });
-    batch.set(doc(db, "users", $user!.uid), {
-      username,
-      photoURL: $user?.photoURL,
-      published: true,
-      bio: "I am a friend of the trees",
-      links: [{ title: "Test Link", url: "https://kung.foo", icon: null }],
-    });
-    await batch.commit();
-    isAvailable = false;
-    doIOwnUsername = true;
-    currentUsername = username;
+    try {
+      // NEED A WHERE USER UID === $user.uid QUERY I NEED RELATIONS
+      const userDoc = await getDoc(doc(db, "users", $user!.uid));
+      const currentUsernameDoc = await getDoc(
+        doc(db, "usernames", currentUsername)
+      );
+
+      // if (
+      //   userDoc.exists() &&
+      //   // currentUsernameDoc.exists() &&
+      //   // currentUsernameDoc.id === username
+      // ) {
+      //   console.log("User already owns this username");
+      //   alert("You already own this username.");
+      //   return;
+      // }
+      const batch = writeBatch(db);
+      if (userDoc.exists()) {
+        console.log("User already has a user doc");
+        batch.delete(currentUsernameDoc.ref);
+        batch.set(doc(db, "usernames", username), { uid: $user!.uid });
+      } else {
+        console.log("User is new. Creating doc");
+        batch.set(doc(db, "usernames", username), { uid: $user!.uid });
+        batch.set(doc(db, "users", $user!.uid), {
+          username,
+          photoURL: $user?.photoURL,
+          published: true,
+          bio: "I am a friend of the trees",
+          links: [{ title: "Test Link", url: "https://kung.foo", icon: null }],
+        });
+      }
+      await batch.commit();
+      isAvailable = false;
+      doIOwnUsername = true;
+      currentUsername = username;
+    } catch (err: any) {
+      console.error(err.message);
+    }
   }
 </script>
 
